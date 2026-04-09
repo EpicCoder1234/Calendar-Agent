@@ -2,7 +2,6 @@ import os
 from datetime import date
 from dotenv import load_dotenv
 
-# Load .env from the project root (one level up from backend/)
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -14,7 +13,6 @@ from src.state import AgentState
 from src.llm import get_llm
 from src.tools.gcal import get_calendar_events, create_event
 
-# ── Build the graph once at startup ──────────────────────────────────────────
 
 _llm = get_llm()
 _tools = [get_calendar_events, create_event]
@@ -41,7 +39,6 @@ _workflow.add_edge("action", "agent")
 _memory = MemorySaver()
 _app = _workflow.compile(checkpointer=_memory)
 
-# ── System prompt ─────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT_TEMPLATE = """You are Life-Ops, a smart personal scheduling assistant with direct access to the user's Google Calendar.
 
@@ -57,7 +54,6 @@ RULES YOU MUST FOLLOW — NO EXCEPTIONS:
 """
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
 
 def run_agent(message: str, thread_id: str = "default") -> dict:
     """

@@ -1,6 +1,5 @@
 import os
 
-# Required for local dev: allows OAuth over HTTP (not HTTPS)
 os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
 
 from fastapi import FastAPI, HTTPException
@@ -26,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── OAuth constants ───────────────────────────────────────────────────────────
+
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 _SRC_DIR = os.path.join(os.path.dirname(__file__), 'src')
 CREDENTIALS_FILE = os.path.join(_SRC_DIR, 'credentials.json')
@@ -34,12 +33,11 @@ TOKEN_FILE       = os.path.join(_SRC_DIR, 'token.json')
 REDIRECT_URI     = 'http://localhost:8000/auth/callback'
 FRONTEND_URL     = 'http://localhost:5173'
 
-# Stores the Flow object between /auth/login and /auth/callback so the
-# PKCE code_verifier (generated inside the Flow) is preserved.
+
 _pending_flows: dict[str, Flow] = {}
 
 
-# ── Schemas ───────────────────────────────────────────────────────────────────
+
 class ChatRequest(BaseModel):
     message: str
     thread_id: str = "default_session"
@@ -50,13 +48,12 @@ class ChatResponse(BaseModel):
     tool_calls: list[str] = []
 
 
-# ── Health ────────────────────────────────────────────────────────────────────
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "agent": "Life-Ops Calendar Agent"}
 
 
-# ── Auth: status ──────────────────────────────────────────────────────────────
 @app.get("/auth/status")
 async def auth_status():
     """Check if a valid Google Calendar token exists."""
@@ -77,7 +74,6 @@ async def auth_status():
     return {"authenticated": False}
 
 
-# ── Auth: login ───────────────────────────────────────────────────────────────
 @app.get("/auth/login")
 async def auth_login():
     """Redirect the user to Google's OAuth consent page."""
@@ -91,12 +87,11 @@ async def auth_login():
         prompt='consent',
         include_granted_scopes='true',
     )
-    # Persist the Flow so the PKCE code_verifier survives until /auth/callback
     _pending_flows[state] = flow
     return RedirectResponse(url=auth_url)
 
 
-# ── Auth: callback ────────────────────────────────────────────────────────────
+
 @app.get("/auth/callback")
 async def auth_callback(code: str = None, error: str = None, state: str = None):
     """Receive Google's redirect, exchange code for tokens, save, go back to UI."""
@@ -105,7 +100,6 @@ async def auth_callback(code: str = None, error: str = None, state: str = None):
     if not code:
         return RedirectResponse(url=f"{FRONTEND_URL}?auth_error=missing_code")
     try:
-        # Reuse the exact Flow from /auth/login so the PKCE code_verifier matches
         flow = _pending_flows.pop(state, None)
         if flow is None:
             return RedirectResponse(url=f"{FRONTEND_URL}?auth_error=session_expired_please_try_again")
@@ -117,7 +111,6 @@ async def auth_callback(code: str = None, error: str = None, state: str = None):
         return RedirectResponse(url=f"{FRONTEND_URL}?auth_error={str(e)}")
 
 
-# ── Auth: disconnect ──────────────────────────────────────────────────────────
 @app.get("/auth/disconnect")
 async def auth_disconnect():
     """Delete the stored token to unlink Google Calendar."""
@@ -126,7 +119,6 @@ async def auth_disconnect():
     return {"disconnected": True}
 
 
-# ── Chat ──────────────────────────────────────────────────────────────────────
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     if not request.message.strip():
@@ -140,6 +132,5 @@ async def chat(request: ChatRequest):
     return ChatResponse(**result)
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

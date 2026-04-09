@@ -15,13 +15,11 @@ const getSessionId = () => {
 const nowStr = () =>
   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
-// ── Tool label map ────────────────────────────────────────────────────────────
 const TOOL_LABELS = {
   get_calendar_events: '🔍 Checking your calendar…',
   create_event:        '📅 Creating calendar event…',
 }
 
-// ── Connect Screen ────────────────────────────────────────────────────────────
 function ConnectScreen({ onConnected, authError }) {
   return (
     <div className="connect-screen">
@@ -86,7 +84,6 @@ function ConnectScreen({ onConnected, authError }) {
   )
 }
 
-// ── Typing Indicator ──────────────────────────────────────────────────────────
 function TypingIndicator() {
   return (
     <div className="message-wrapper agent">
@@ -98,7 +95,6 @@ function TypingIndicator() {
   )
 }
 
-// ── Message Bubble ────────────────────────────────────────────────────────────
 function MessageBubble({ msg }) {
   if (msg.role === 'system') {
     return (
@@ -124,9 +120,7 @@ function MessageBubble({ msg }) {
   )
 }
 
-// ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {
-  // auth: null = checking, false = not authed, true = authed
   const [auth, setAuth]     = useState(null)
   const [authError, setAuthError] = useState(null)
   const [messages, setMessages]   = useState([
@@ -143,12 +137,10 @@ export default function App() {
   const inputRef  = useRef(null)
   const sessionId = useRef(getSessionId())
 
-  // ── Check auth on mount + handle redirect params ──────────────────────────
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
 
     if (params.get('auth_success')) {
-      // Clean the URL, then verify auth
       window.history.replaceState({}, '', '/')
     }
     if (params.get('auth_error')) {
@@ -162,7 +154,6 @@ export default function App() {
       .catch(() => setAuth(false))
   }, [])
 
-  // ── Auto-scroll ───────────────────────────────────────────────────────────
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
@@ -171,7 +162,6 @@ export default function App() {
     setMessages(prev => [...prev, ...msgs])
   }, [])
 
-  // ── Send message ──────────────────────────────────────────────────────────
   const sendMessage = useCallback(async () => {
     if (!input.trim() || loading) return
 
@@ -188,7 +178,7 @@ export default function App() {
       })
 
       if (res.status === 401) {
-        setAuth(false)  // token expired — show connect screen again
+        setAuth(false)  
         return
       }
       if (!res.ok) throw new Error(`Server responded with ${res.status}`)
@@ -232,7 +222,6 @@ export default function App() {
     setMessages([])
   }
 
-  // ── Render states ─────────────────────────────────────────────────────────
   if (auth === null) {
     return (
       <div className="app loading-screen">

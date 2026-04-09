@@ -4,7 +4,6 @@ import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from auth import get_calendar_service
 
-# Simplified snippet based on official Python quickstart
 service = get_calendar_service()
 
 
@@ -13,7 +12,7 @@ def get_calendar_events():
     Retrieves a list of upcoming events from the user's Google Calendar.
     Use this whenever the user asks about their schedule or free time.
     """
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    now = datetime.datetime.utcnow().isoformat() + 'Z' 
     events_result = service.events().list(
         calendarId='primary', 
         timeMin=now,

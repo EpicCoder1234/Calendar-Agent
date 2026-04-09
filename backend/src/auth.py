@@ -8,21 +8,17 @@ import ssl
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-# If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-# Absolute paths derived from this file's location — works regardless of CWD
 _SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 _TOKEN_PATH = os.path.join(_SRC_DIR, 'token.json')
-_CREDENTIALS_PATH = os.path.join(_SRC_DIR, 'credentials.json')  # fixed: was pointing one level up
+_CREDENTIALS_PATH = os.path.join(_SRC_DIR, 'credentials.json')  
 
 def get_calendar_service():
     creds = None
-    # The file token.json stores the user's access and refresh tokens
     if os.path.exists(_TOKEN_PATH):
         creds = Credentials.from_authorized_user_file(_TOKEN_PATH, SCOPES)
     
-    # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
