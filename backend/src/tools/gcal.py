@@ -31,10 +31,9 @@ def get_calendar_events():
 
 
 def create_event(summary, description, start_time, end_time, timezone):
-    now = datetime.datetime.utcnow().isoformat() + 'Z' 
     """
     Creates a new event on the user's Google Calendar.
-    Requires a summary/title, a start ISO timestamp, and an end ISO timestamp.
+    Requires a summary/title, a start ISO timestamp, an end ISO timestamp, and a timezone string.
     """
     event = {
         'summary': summary,
